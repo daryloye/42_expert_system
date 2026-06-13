@@ -10,19 +10,20 @@ Reads the input text file and validates that:
 
 - the file format is correct
 - only supported characters are used
+- input rules are valid
 
 ### `parse.py`
 
 Parses the validated input and returns:
 
 - an array of rules, where each rule contains a left-hand side string and a right-hand side string
-- a map of variables
+	- In this array, LHS implies (=>) RHS
+	- Hence if the imput has a rule X <=> Y, the array will break it into X => Y and Y => X
+- a map of variables storing
+	- `fact`: whether the variable is true or false
+	- `verified`: whether the variable has already been evaluated
 - an array of queries
 
-Each variable stores:
-
-- `fact`: whether the variable is true or false;
-- `verified`: whether the variable has already been evaluated.
 
 ### `solve.py`
 
@@ -43,12 +44,7 @@ For each query:
    - if there is a conflict, mark the fact as unknown.
 5. Return the final fact value.
 
-## Example
-
-```text
-Facts:
-Queries: B
-
-A > B
-B > A
+## Testing 
+```
+pytest test_solve.py
 ```

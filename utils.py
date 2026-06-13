@@ -1,3 +1,14 @@
+from enum import Enum
+
+SYMBOLS = '!&|^>='
+LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+class Fact(Enum):
+    TRUE = 1
+    FALSE = 2
+    NONE = 3
+    UNDETERMINED = 4
+
 def print_red(s):
     print(f"\033[31m{s}\033[0m")
 
