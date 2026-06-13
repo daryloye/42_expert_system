@@ -4,11 +4,10 @@ from solve import *
 
 def test_if_query_is_verified_then_return_current_fact():
     rules = [
-        {'l_string': 'AB&', 'r_string': 'C'}
+        {'l_string': 'A', 'r_string': 'C'}
     ]
     variables = {
         'A': {'fact': Fact.FALSE, 'verified': False},
-        'B': {'fact': Fact.FALSE, 'verified': False},
         'C': {'fact': Fact.TRUE, 'verified': True}
     }
     x = 'C'
@@ -18,26 +17,24 @@ def test_if_query_is_verified_then_return_current_fact():
 
 def test_if_query_is_not_in_RHS_of_any_rule_then_return_current_fact():
     rules = [
-        {'l_string': 'AB&', 'r_string': 'C'}
+        {'l_string': 'A', 'r_string': 'C'}
     ]
     variables = {
         'A': {'fact': Fact.FALSE, 'verified': False},
-        'B': {'fact': Fact.FALSE, 'verified': False},
         'C': {'fact': Fact.FALSE, 'verified': False},
-        'D': {'fact': Fact.FALSE, 'verified': False}
+        'D': {'fact': Fact.TRUE, 'verified': False}
     }
     x = 'D'
 
-    assert solve(x, rules, variables) == Fact.FALSE
+    assert solve(x, rules, variables) == Fact.TRUE
 
 
 def test_if_LHS_is_false_then_skip_rule():
     rules = [
-        {'l_string': 'AB&', 'r_string': 'C'}
+        {'l_string': 'A', 'r_string': 'C'}
     ]
     variables = {
         'A': {'fact': Fact.FALSE, 'verified': False},
-        'B': {'fact': Fact.FALSE, 'verified': False},
         'C': {'fact': Fact.FALSE, 'verified': False}
     }
     x = 'C'
@@ -45,9 +42,92 @@ def test_if_LHS_is_false_then_skip_rule():
     assert solve(x, rules, variables) == Fact.FALSE
 
 
-def test_if_LHS_is_true_then_infer_query():
+def test_if_RHS_requires_query_to_be_true_then_infer_true():
     rules = [
-        {'l_string': 'AB&', 'r_string': 'C'}
+        {'l_string': 'A', 'r_string': 'C'}
+    ]
+    variables = {
+        'A': {'fact': Fact.TRUE, 'verified': False},
+        'C': {'fact': Fact.FALSE, 'verified': False}
+    }
+    x = 'C'
+
+    assert solve(x, rules, variables) == Fact.TRUE
+    
+
+def test_if_RHS_requires_query_to_be_false_then_infer_false():
+    rules = [
+        {'l_string': 'A', 'r_string': 'C!'}
+    ]
+    variables = {
+        'A': {'fact': Fact.TRUE, 'verified': False},
+        'C': {'fact': Fact.TRUE, 'verified': False}
+    }
+    x = 'C'
+
+    assert solve(x, rules, variables) == Fact.FALSE
+
+
+def test_if_RHS_does_not_uniquely_determine_query_then_keep_current_fact():
+    rules = [
+        {'l_string': 'A', 'r_string': 'CB|'}
+    ]
+    variables = {
+        'A': {'fact': Fact.TRUE, 'verified': False},
+        'B': {'fact': Fact.TRUE, 'verified': False},
+        'C': {'fact': Fact.FALSE, 'verified': False}
+    }
+    x = 'C'
+
+    assert solve(x, rules, variables) == Fact.FALSE
+
+
+def test_if_conflicting_rules_then_x_is_undetermined():
+    rules = [
+        {'l_string': 'A', 'r_string': 'C'},
+        {'l_string': 'A', 'r_string': 'C!'}
+    ]
+    variables = {
+        'A': {'fact': Fact.TRUE, 'verified': False},
+        'C': {'fact': Fact.FALSE, 'verified': False}
+    }
+    x = 'C'
+
+    assert solve(x, rules, variables) == Fact.UNDETERMINED
+
+
+def test_if_RHS_is_impossible_for_query_true_or_false_then_query_is_unknown():
+    rules = [
+        {'l_string': 'A', 'r_string': 'CC!&'}
+    ]
+    variables = {
+        'A': {'fact': Fact.TRUE, 'verified': False},
+        'C': {'fact': Fact.FALSE, 'verified': False}
+    }
+    x = 'C'
+
+    assert solve(x, rules, variables) == Fact.FALSE
+
+
+def test_if_query_depends_on_another_rule_then_solve_dependency_first():
+    rules = [
+        {'l_string': 'A', 'r_string': 'B'},
+        {'l_string': 'B', 'r_string': 'C'}
+    ]
+    variables = {
+        'A': {'fact': Fact.TRUE, 'verified': False},
+        'B': {'fact': Fact.FALSE, 'verified': False},
+        'C': {'fact': Fact.FALSE, 'verified': False}
+    }
+    x = 'C'
+
+    assert solve(x, rules, variables) == Fact.TRUE
+
+
+def test_if_multiple_rules_infer_same_fact_then_query_is_not_conflicting():
+    rules = [
+        {'l_string': 'A', 'r_string': 'C'},
+        {'l_string': 'B', 'r_string': 'C'}
     ]
     variables = {
         'A': {'fact': Fact.TRUE, 'verified': False},
@@ -59,16 +139,48 @@ def test_if_LHS_is_true_then_infer_query():
     assert solve(x, rules, variables) == Fact.TRUE
 
 
-def test_if_conflicting_rules_then_x_is_unknown():
-    rules = [
-        {'l_string': 'AB&', 'r_string': 'C'},
-        {'l_string': 'AB&', 'r_string': 'C!'}
-    ]
+def test_evaluate_formula_supports_all_binary_operators():
     variables = {
         'A': {'fact': Fact.TRUE, 'verified': False},
-        'B': {'fact': Fact.TRUE, 'verified': False},
-        'C': {'fact': Fact.FALSE, 'verified': False}
+        'B': {'fact': Fact.FALSE, 'verified': False},
+        'C': {'fact': Fact.TRUE, 'verified': False}
     }
-    x = 'C'
 
-    assert solve(x, rules, variables) == Fact.UNDETERMINED
+    assert evaluate_formula('AB&', variables) is False
+    assert evaluate_formula('AB|', variables) is True
+    assert evaluate_formula('AB^', variables) is True
+    assert evaluate_formula('AB>', variables) is False
+    assert evaluate_formula('AC=', variables) is True
+
+
+def test_evaluate_formula_raises_for_malformed_formula():
+    variables = {
+        'A': {'fact': Fact.TRUE, 'verified': False},
+        'B': {'fact': Fact.FALSE, 'verified': False}
+    }
+
+    with pytest.raises(Exception):
+        evaluate_formula('&', variables)
+
+    with pytest.raises(Exception):
+        evaluate_formula('AB', variables)
+
+    with pytest.raises(Exception):
+        evaluate_formula('AB@', variables)
+
+
+def test_cylic_dependencies_does_not_recurse_forever():
+    rules = [
+        {'l_string': 'A', 'r_string': 'B'},
+        {'l_string': 'B', 'r_string': 'A'},
+        {'l_string': 'AC&', 'r_string': 'D'}
+    ]
+    variables = {
+        'A': {'fact': Fact.FALSE, 'verified': False},
+        'B': {'fact': Fact.FALSE, 'verified': False},
+        'C': {'fact': Fact.TRUE, 'verified': True},
+        'D': {'fact': Fact.FALSE, 'verified': False}
+    }
+    x = 'D'
+
+    assert solve(x, rules, variables) == Fact.NO_CONCLUSION

@@ -6,7 +6,7 @@ LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 class Fact(Enum):
     TRUE = 1
     FALSE = 2
-    NONE = 3
+    NO_CONCLUSION = 3
     UNDETERMINED = 4
 
 def print_red(s):

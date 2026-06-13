@@ -48,7 +48,7 @@ def infer_x_from_rule(x, rule, variables):
     
     # If LHS is false, then RHS cannot be inferred. Skip the rule
     if lhs_result is False:
-        return Fact.NONE
+        return Fact.NO_CONCLUSION
 
     # If LHS is true, then infer x from RHS
     original_fact = variables[x]["fact"]
@@ -70,10 +70,10 @@ def infer_x_from_rule(x, rule, variables):
             return Fact.FALSE
         case (True, True):
             print_blue(f"RHS is True when {x} is either True or False")
-            return Fact.NONE
+            return Fact.NO_CONCLUSION
         case (False, False):
-            print("conflict detected")
-            return Fact.UNDETERMINED
+            print_blue(f"Impossible for RHS to be True")
+            return Fact.NO_CONCLUSION
 
 
 def solve_dependencies(x, rule, rules, variables):
@@ -102,7 +102,7 @@ def solve(x, rules, variables):
 
     # Check rules where x is in RHS
     current_fact = variables[x]["fact"]
-    variables[x]["fact"] = Fact.NONE
+    variables[x]["fact"] = Fact.NO_CONCLUSION
     
     for rule in rules:
         if x not in rule["r_string"]:
@@ -113,12 +113,12 @@ def solve(x, rules, variables):
         solve_dependencies(x, rule, rules, variables)
 
         inferred = infer_x_from_rule(x, rule, variables)
-        if inferred is Fact.NONE:
+        if inferred is Fact.NO_CONCLUSION:
             print_blue(f"Cannot infer {x} from this rule")
             continue
         
         # Check if any conflict with previous rules
-        if variables[x]["fact"] is not Fact.NONE and variables[x]["fact"] is not inferred:
+        if variables[x]["fact"] is not Fact.NO_CONCLUSION and variables[x]["fact"] is not inferred:
             print_blue(f"Conflict with previous rule, setting {x} to Undetermined")
             variables[x]["fact"] = Fact.UNDETERMINED
             return Fact.UNDETERMINED
