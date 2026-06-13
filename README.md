@@ -1,1 +1,54 @@
-# 42_expert_system
+# 42 Expert System
+
+This project implements an expert system that reads a set of facts, rules, and queries, then determines the truth value of each query by evaluating the available rules.
+
+## Components
+
+### `read.py`
+
+Reads the input text file and validates that:
+
+- the file format is correct
+- only supported characters are used
+
+### `parse.py`
+
+Parses the validated input and returns:
+
+- an array of rules, where each rule contains a left-hand side string and a right-hand side string
+- a map of variables
+- an array of queries
+
+Each variable stores:
+
+- `fact`: whether the variable is true or false;
+- `verified`: whether the variable has already been evaluated.
+
+### `solve.py`
+
+Solves each query using the parsed facts and rules.
+
+For each query:
+
+1. If the query has already been verified, return its current fact value.
+2. Mark the query as verified.
+3. If the query does not appear on the right-hand side of any rule, return its current fact value.
+4. For each rule where the query appears on the right-hand side:
+   - evaluate all other variables used in the rule;
+   - solve the left-hand side of the rule;
+   - skip the rule if the left-hand side is false;
+   - if the left-hand side is true, evaluate the right-hand side;
+   - if the query can be either true or false without changing the result of the right-hand side, skip the rule;
+   - compare the query conclusion with conclusions from previous rules;
+   - if there is a conflict, mark the fact as unknown.
+5. Return the final fact value.
+
+## Example
+
+```text
+Facts:
+Queries: B
+
+A > B
+B > A
+```
