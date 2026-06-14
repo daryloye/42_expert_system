@@ -20,7 +20,7 @@ Parses the validated input and returns:
 	- In this array, LHS implies (=>) RHS
 	- Hence if the imput has a rule X <=> Y, the array will break it into X => Y and Y => X
 - a map of variables storing
-	- `fact`: whether the variable is true or false
+	- `fact`: whether the variable is true, false or undetermined
 	- `verified`: whether the variable has already been evaluated
 - an array of queries
 
@@ -37,14 +37,14 @@ For each query:
 4. For each rule where the query appears on the right-hand side:
    - evaluate all other variables used in the rule;
    - solve the left-hand side of the rule;
-   - skip the rule if the left-hand side is false;
+   - skip the rule if the left-hand side is false or undetermined;
    - if the left-hand side is true, evaluate the right-hand side;
-   - if the query can be either true or false without changing the result of the right-hand side, skip the rule;
+   - if the query can be either true or false without changing the result of the right-hand side, mark it as undetermined;
    - compare the query conclusion with conclusions from previous rules;
-   - if there is a conflict, mark the fact as unknown.
+   - if there is a conflict, mark the fact as undetermined.
 5. Return the final fact value.
 
 ## Testing 
 ```
-pytest test_solve.py
+pytest -q
 ```
