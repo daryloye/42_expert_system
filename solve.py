@@ -7,7 +7,7 @@ def infer_x_from_rule(x, rule, variables):
     print_blue(f"- LHS result: {lhs_result}")
     
     # If LHS is false, then RHS cannot be inferred. Skip the rule
-    if lhs_result is Fact.FALSE or lhs_result is Fact.UNDETERMINED:
+    if lhs_result in (Fact.FALSE, Fact.UNDETERMINED):
         print_blue(f"Cannot infer {x} from this rule")
         return None
 
@@ -84,7 +84,7 @@ def solve(x, rules, variables):
             continue
         
         # Check if any conflict with previous rules
-        if variables[x]["fact"] is not None and variables[x]["fact"] is not Fact.UNDETERMINED and variables[x]["fact"] is not inferred:
+        if variables[x]["fact"] not in (None, Fact.UNDETERMINED, inferred):
             print_red(f"Conflict with previous rule, setting {x} to Undetermined")
             variables[x]["fact"] = Fact.UNDETERMINED
             variables[x]["verified"] = True
