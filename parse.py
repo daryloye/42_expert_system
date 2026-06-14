@@ -33,28 +33,29 @@ def parse():
 
 # Example Input:
 
-# INPUT_RULES = [
-#     {"l_string": "C", "r_string": "E"},
-#     {"l_string": "ABC&&", "r_string": "D"},
-#     {"l_string": "AB|", "r_string": "C"},
-#     {"l_string": "AB!|", "r_string": "F"},
-#     {"l_string": "CG!|", "r_string": "H"},
-#     {"l_string": "VW^", "r_string": "X"},
-#     {"l_string": "AB&", "r_string": "YZ&"},
-#     {"l_string": "CD|", "r_string": "XV|"},
-#     {"l_string": "EF&", "r_string": "V!"},
-#     {"l_string": "AB&", "r_string": "C"},
-#     {"l_string": "C", "r_string": "AB&"},
-#     {"l_string": "AB&", "r_string": "C!"},
-#     {"l_string": "C!", "r_string": "AB&"}
-# ]
-
-# INPUT_FACTS = ["A", "B", "G"]
-INPUT_FACTS = ["A"]
-
-INPUT_QUERIES = ["C"]
-
 INPUT_RULES = [
-    {"l_string": "AB|", "r_string": "CB&"},
-    # {"l_string": "AB|", "r_string": "C!"},
+    {"l_string": "C", "r_string": "E"},
+    {"l_string": "ABC&&", "r_string": "D"},
+    {"l_string": "AB|", "r_string": "C"},
+    {"l_string": "AB!|", "r_string": "F"},
+    {"l_string": "CG!|", "r_string": "H"},
+    {"l_string": "VW^", "r_string": "X"},
+    {"l_string": "AB&", "r_string": "YZ&"},
+    {"l_string": "CD|", "r_string": "XV|"},
+    {"l_string": "EF&", "r_string": "V!"},
+    {"l_string": "AB&", "r_string": "C"},
+    {"l_string": "C", "r_string": "AB&"},
+    {"l_string": "AB&", "r_string": "C!"},
+    {"l_string": "C!", "r_string": "AB&"}
 ]
+
+INPUT_FACTS = ["A", "B", "G"]
+# INPUT_FACTS = ["A"]
+
+# INPUT_QUERIES = ["G", "V", "X"]
+# INPUT_QUERIES = ['A', 'B','C', 'D','E','F','G','H','V','W','X','Y','Z']
+INPUT_QUERIES = ['X']
+
+# INPUT_RULES = [
+#     {"l_string": "AB|", "r_string": "CB&"},
+# ]

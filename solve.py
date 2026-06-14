@@ -1,80 +1,43 @@
 from utils import *
-
-
-def apply_operator(stack: list, operator: str):
-    right = stack.pop()
-    left = stack.pop()
-
-    match operator:
-        case '&':
-            stack.append(left & right)
-        case '|':
-            stack.append(left | right)
-        case '^':
-            stack.append(left ^ right)
-        case '>':
-            stack.append((not left) | right)
-        case '=':
-            stack.append(left == right)
-        case _:
-            raise Exception('invalid character: ', operator)
-
-
-def evaluate_formula(formula, variables) -> bool:
-    stack = []
-    for c in formula:
-        if c in LETTERS:
-            stack.append(variables[c]["fact"] == Fact.TRUE)
-        
-        elif c == '!':
-            if len(stack) < 1:
-                raise Exception('not enough operands')
-            stack.append(not stack.pop())
-        
-        else:
-            if len(stack) < 2:
-                raise Exception('not enough operands')
-            apply_operator(stack, c)
-        
-    if len(stack) > 1:
-        raise Exception('too many operands')
-    
-    return stack.pop()
+from evaluate import *
 
 
 def infer_x_from_rule(x, rule, variables):
-    lhs_result = evaluate_formula(rule["l_string"], variables)
+    lhs_result = evaluate(rule["l_string"], variables)
     print_blue(f"- LHS result: {lhs_result}")
     
     # If LHS is false, then RHS cannot be inferred. Skip the rule
-    if lhs_result is False:
-        return Fact.NO_CONCLUSION
+    if lhs_result is Fact.FALSE or lhs_result is Fact.UNDETERMINED:
+        print_blue(f"Cannot infer {x} from this rule")
+        return None
 
     # If LHS is true, then infer x from RHS
     original_fact = variables[x]["fact"]
     
     variables[x]["fact"] = Fact.TRUE
-    rhs_result_with_x_true = evaluate_formula(rule["r_string"], variables)
+    rhs_result_with_x_true = evaluate(rule["r_string"], variables)
 
     variables[x]["fact"] = Fact.FALSE
-    rhs_result_with_x_false = evaluate_formula(rule["r_string"], variables)
+    rhs_result_with_x_false = evaluate(rule["r_string"], variables)
 
     variables[x]["fact"] = original_fact
 
+    print_blue(f"RHS if {x} is true: {rhs_result_with_x_true} | RHS if {x} is false: {rhs_result_with_x_false}")
     match (rhs_result_with_x_true, rhs_result_with_x_false):
-        case (True, False):
-            print_blue(f"RHS is True when {x} is True")
+        case (Fact.TRUE, Fact.FALSE):
             return Fact.TRUE
-        case (False, True):
-            print_blue(f"RHS is True when {x} is False")
+        case (Fact.TRUE, Fact.UNDETERMINED):
+            return Fact.TRUE
+        case (Fact.FALSE, Fact.TRUE):
             return Fact.FALSE
-        case (True, True):
-            print_blue(f"RHS is True when {x} is either True or False")
-            return Fact.NO_CONCLUSION
-        case (False, False):
-            print_blue(f"Impossible for RHS to be True")
-            return Fact.NO_CONCLUSION
-
+        case (Fact.UNDETERMINED, Fact.TRUE):
+            return Fact.FALSE
+        case (Fact.FALSE, Fact.FALSE):
+            print_red(f"Impossible for RHS to be True")
+            return Fact.UNDETERMINED
+        case _:
+            return Fact.UNDETERMINED
+    
 
 def solve_dependencies(x, rule, rules, variables):
     dependents = set(rule["l_string"] + rule["r_string"]) - set(SYMBOLS) - set(x)
@@ -92,17 +55,21 @@ def solve(x, rules, variables):
         print_blue(f"{x} has already been verified as {variables[x]["fact"]}")
         return variables[x]["fact"]
 
-	# Mark the query as verified
-    variables[x]["verified"] = True
+    # Mark cyclic dependencies as undetermined
+    if variables[x]["fact"] is None:
+        print_blue(f"{x} is cyclic dependency, marking as undetermined")
+        variables[x]["fact"] = Fact.UNDETERMINED
+        return variables[x]["fact"]
 
     # If x is not in RHS of any rule, then return the current fact
     if not any(x in r["r_string"] for r in rules):
         print_blue(f"Cannot find {x} in RHS of any rule, returning current fact")
+        variables[x]["verified"] = True
         return variables[x]["fact"]
 
     # Check rules where x is in RHS
     current_fact = variables[x]["fact"]
-    variables[x]["fact"] = Fact.NO_CONCLUSION
+    variables[x]["fact"] = None
     
     for rule in rules:
         if x not in rule["r_string"]:
@@ -113,20 +80,21 @@ def solve(x, rules, variables):
         solve_dependencies(x, rule, rules, variables)
 
         inferred = infer_x_from_rule(x, rule, variables)
-        if inferred is Fact.NO_CONCLUSION:
-            print_blue(f"Cannot infer {x} from this rule")
+        if inferred is None:
             continue
         
         # Check if any conflict with previous rules
-        if variables[x]["fact"] is not Fact.NO_CONCLUSION and variables[x]["fact"] is not inferred:
-            print_blue(f"Conflict with previous rule, setting {x} to Undetermined")
+        if variables[x]["fact"] is not None and variables[x]["fact"] is not Fact.UNDETERMINED and variables[x]["fact"] is not inferred:
+            print_red(f"Conflict with previous rule, setting {x} to Undetermined")
             variables[x]["fact"] = Fact.UNDETERMINED
+            variables[x]["verified"] = True
             return Fact.UNDETERMINED
 
         print_blue(f"Setting {x} to be {inferred}\n")
         variables[x]["fact"] = inferred
         current_fact = inferred
     
-    print_blue(f"Returning current fact")
+    print_blue(f"Returning current fact: {current_fact}")
     variables[x]["fact"] = current_fact
+    variables[x]["verified"] = True
     return current_fact

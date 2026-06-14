@@ -1,4 +1,3 @@
-import pytest
 from solve import *
 
 
@@ -68,18 +67,32 @@ def test_if_RHS_requires_query_to_be_false_then_infer_false():
     assert solve(x, rules, variables) == Fact.FALSE
 
 
-def test_if_RHS_does_not_uniquely_determine_query_then_keep_current_fact():
+def test_if_RHS_is_ambiguous_then_infer_undetermined():
     rules = [
         {'l_string': 'A', 'r_string': 'CB|'}
     ]
     variables = {
         'A': {'fact': Fact.TRUE, 'verified': False},
-        'B': {'fact': Fact.TRUE, 'verified': False},
+        'B': {'fact': Fact.FALSE, 'verified': False},
         'C': {'fact': Fact.FALSE, 'verified': False}
     }
     x = 'C'
 
-    assert solve(x, rules, variables) == Fact.FALSE
+    assert solve(x, rules, variables) == Fact.UNDETERMINED
+
+
+def test_if_fact_is_ambiguous_then_infer_undetermined():
+    rules = [
+        {'l_string': 'A', 'r_string': 'CB&'}
+    ]
+    variables = {
+        'A': {'fact': Fact.TRUE, 'verified': False},
+        'B': {'fact': Fact.UNDETERMINED, 'verified': False},
+        'C': {'fact': Fact.FALSE, 'verified': False}
+    }
+    x = 'C'
+
+    assert solve(x, rules, variables) == Fact.UNDETERMINED
 
 
 def test_if_conflicting_rules_then_x_is_undetermined():
@@ -96,7 +109,7 @@ def test_if_conflicting_rules_then_x_is_undetermined():
     assert solve(x, rules, variables) == Fact.UNDETERMINED
 
 
-def test_if_RHS_is_impossible_for_query_true_or_false_then_query_is_unknown():
+def test_if_RHS_is_impossible_for_query_true_or_false_then_query_is_undetermined():
     rules = [
         {'l_string': 'A', 'r_string': 'CC!&'}
     ]
@@ -106,7 +119,7 @@ def test_if_RHS_is_impossible_for_query_true_or_false_then_query_is_unknown():
     }
     x = 'C'
 
-    assert solve(x, rules, variables) == Fact.FALSE
+    assert solve(x, rules, variables) == Fact.UNDETERMINED
 
 
 def test_if_query_depends_on_another_rule_then_solve_dependency_first():
@@ -139,36 +152,6 @@ def test_if_multiple_rules_infer_same_fact_then_query_is_not_conflicting():
     assert solve(x, rules, variables) == Fact.TRUE
 
 
-def test_evaluate_formula_supports_all_binary_operators():
-    variables = {
-        'A': {'fact': Fact.TRUE, 'verified': False},
-        'B': {'fact': Fact.FALSE, 'verified': False},
-        'C': {'fact': Fact.TRUE, 'verified': False}
-    }
-
-    assert evaluate_formula('AB&', variables) is False
-    assert evaluate_formula('AB|', variables) is True
-    assert evaluate_formula('AB^', variables) is True
-    assert evaluate_formula('AB>', variables) is False
-    assert evaluate_formula('AC=', variables) is True
-
-
-def test_evaluate_formula_raises_for_malformed_formula():
-    variables = {
-        'A': {'fact': Fact.TRUE, 'verified': False},
-        'B': {'fact': Fact.FALSE, 'verified': False}
-    }
-
-    with pytest.raises(Exception):
-        evaluate_formula('&', variables)
-
-    with pytest.raises(Exception):
-        evaluate_formula('AB', variables)
-
-    with pytest.raises(Exception):
-        evaluate_formula('AB@', variables)
-
-
 def test_cylic_dependencies_does_not_recurse_forever():
     rules = [
         {'l_string': 'A', 'r_string': 'B'},
@@ -183,4 +166,19 @@ def test_cylic_dependencies_does_not_recurse_forever():
     }
     x = 'D'
 
-    assert solve(x, rules, variables) == Fact.NO_CONCLUSION
+    assert solve(x, rules, variables) == Fact.FALSE
+
+
+def test_if_inference_from_first_rule_is_ambiguous_and_second_is_deterministic_then_override():
+    rules = [
+        {'l_string': 'A', 'r_string': 'CB|'},
+        {'l_string': 'A', 'r_string': 'C'}
+    ]
+    variables = {
+        'A': {'fact': Fact.TRUE, 'verified': False},
+        'B': {'fact': Fact.FALSE, 'verified': False},
+        'C': {'fact': Fact.FALSE, 'verified': False}
+    }
+    x = 'C'
+
+    assert solve(x, rules, variables) == Fact.TRUE
