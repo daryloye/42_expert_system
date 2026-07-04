@@ -52,7 +52,7 @@ def solve_dependencies(x, rule, rules, variables):
 def solve(x, rules, variables):
     # If x has already been verified, then return the fact
     if variables[x]["verified"] is True:
-        print_blue(f"{x} has already been verified as {variables[x]["fact"]}")
+        print_blue(f"{x} has already been verified as {variables[x]['fact']}")
         return variables[x]["fact"]
 
     # Mark cyclic dependencies as undetermined
@@ -75,7 +75,7 @@ def solve(x, rules, variables):
         if x not in rule["r_string"]:
             continue
         
-        print_blue(f"- Found {x} on RHS of rule: {rule["l_string"]} => {rule["r_string"]}")
+        print_blue(f"- Found {x} on RHS of rule: {rule['l_string']} => {rule['r_string']}")
 
         solve_dependencies(x, rule, rules, variables)
 
