@@ -1,22 +1,23 @@
-from read import *
-from parse import *
-from solve import *
-from utils import *
+import sys
+
+from read import read
+from parse import parse
+from solve import solve
+from utils import Fact
 
 
 if __name__ == "__main__":
     try:
-        read()
-        rules, variables, queries = parse()
+        if len(sys.argv) != 2:
+            raise Exception("Usage: python main.py <input_file>")
 
-        print_yellow(f"RULES: {rules}\n")
-        print_yellow(f"VARIABLES: {variables}\n")
-        print_yellow(f"QUERIES: {queries}\n")
+        raw_rules, facts, queries = read(sys.argv[1])
+        rules, variables, queries = parse(raw_rules, facts, queries)
 
         for x in queries:
-            print_red(f"Solving for: {x}")
             result = solve(x, rules, variables)
-            print_red(f"{x} is {result}\n")
+            print(f"{x}: {result.name}")
 
     except Exception as e:
         print(f"Error: {e}")
+        sys.exit(1)
