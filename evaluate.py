@@ -1,4 +1,5 @@
 from utils import *
+from tree import *
 
 
 def evaluate_not(x):
@@ -56,24 +57,27 @@ def apply_operator(stack: list, operator: str):
             raise Exception('invalid character: ', operator)
 
 
-def evaluate(formula, variables) -> bool:
-    stack = []
-    for c in formula:
-        if c in LETTERS:
-            stack.append(variables[c]["fact"])
-        
-        elif c == '!':
-            if len(stack) < 1:
-                raise Exception('not enough operands')
-            x = stack.pop()
-            stack.append( evaluate_not(x) )
-        
-        else:
-            if len(stack) < 2:
-                raise Exception('not enough operands')
-            apply_operator(stack, c)
-        
-    if len(stack) > 1:
-        raise Exception('too many operands')
-    
-    return stack.pop()
+def evaluate_tree(op, variables) -> bool:
+    match op.symbol:
+        case '!':
+            return evaluate_not(
+                evaluate_tree(op.e1, variables)
+            )
+        case '&':
+            return evaluate_and(
+                evaluate_tree(op.e1, variables),
+                evaluate_tree(op.e2, variables)
+            )
+        case '|':
+            return evaluate_or(
+                evaluate_tree(op.e1, variables),
+                evaluate_tree(op.e2, variables)
+            )
+        case '^':
+            return evaluate_xor(
+                evaluate_tree(op.e1, variables),
+                evaluate_tree(op.e2, variables)
+            )
+        case _:
+            return variables[op.e1]["fact"]
+

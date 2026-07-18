@@ -4,8 +4,8 @@ SYMBOLS = '!&|^'
 LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 class Fact(Enum):
-    TRUE = 1
-    FALSE = 2
+    TRUE         = 1
+    FALSE        = 2
     UNDETERMINED = 3
 
 def print_red(s):

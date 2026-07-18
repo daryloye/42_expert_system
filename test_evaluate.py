@@ -9,9 +9,9 @@ def test_evaluate_supports_all_binary_operators():
         'C': {'fact': Fact.TRUE, 'verified': False}
     }
 
-    assert evaluate('AB&', variables) is Fact.FALSE
-    assert evaluate('AB|', variables) is Fact.TRUE
-    assert evaluate('AB^', variables) is Fact.TRUE
+    assert evaluate_tree(create_tree('AB&'), variables) is Fact.FALSE
+    assert evaluate_tree(create_tree('AB|'), variables) is Fact.TRUE
+    assert evaluate_tree(create_tree('AB^'), variables) is Fact.TRUE
 
 
 def test_evaluate_raises_for_malformed_formula():
@@ -21,13 +21,13 @@ def test_evaluate_raises_for_malformed_formula():
     }
 
     with pytest.raises(Exception):
-        evaluate('&', variables)
+        evaluate_tree(create_tree('&'), variables)
 
     with pytest.raises(Exception):
-        evaluate('AB', variables)
+        evaluate_tree(create_tree('AB'), variables)
 
     with pytest.raises(Exception):
-        evaluate('AB@', variables)
+        evaluate_tree(create_tree('AB@'), variables)
 
 
 def test_evaluate_not():

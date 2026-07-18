@@ -1,6 +1,6 @@
 from utils import *
 
-LETTER = 'LETTER'
+LETTER = "LETTER"
 
 class Op:
     def __init__(self, symbol, e1, e2=''):

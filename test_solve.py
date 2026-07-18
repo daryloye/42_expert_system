@@ -1,10 +1,10 @@
-from solve import *
 import pytest
+from solve import *
 
 
 def test_if_query_is_verified_then_return_current_fact():
     rules = [
-        {'l_string': 'A', 'r_string': 'C'}
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('C')}
     ]
     variables = {
         'A': {'fact': Fact.FALSE, 'verified': False},
@@ -17,7 +17,7 @@ def test_if_query_is_verified_then_return_current_fact():
 
 def test_if_query_is_not_in_RHS_of_any_rule_then_return_current_fact():
     rules = [
-        {'l_string': 'A', 'r_string': 'C'}
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('C')}
     ]
     variables = {
         'A': {'fact': Fact.FALSE, 'verified': False},
@@ -31,7 +31,7 @@ def test_if_query_is_not_in_RHS_of_any_rule_then_return_current_fact():
 
 def test_if_LHS_is_false_then_skip_rule():
     rules = [
-        {'l_string': 'A', 'r_string': 'C'}
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('C')}
     ]
     variables = {
         'A': {'fact': Fact.FALSE, 'verified': False},
@@ -44,7 +44,7 @@ def test_if_LHS_is_false_then_skip_rule():
 
 def test_if_RHS_requires_query_to_be_true_then_infer_true():
     rules = [
-        {'l_string': 'A', 'r_string': 'C'}
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('C')}
     ]
     variables = {
         'A': {'fact': Fact.TRUE, 'verified': False},
@@ -57,7 +57,7 @@ def test_if_RHS_requires_query_to_be_true_then_infer_true():
 
 def test_if_RHS_requires_query_to_be_false_then_infer_false():
     rules = [
-        {'l_string': 'A', 'r_string': 'C!'}
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('C!')}
     ]
     variables = {
         'A': {'fact': Fact.TRUE, 'verified': False},
@@ -70,7 +70,7 @@ def test_if_RHS_requires_query_to_be_false_then_infer_false():
 
 def test_if_RHS_is_ambiguous_then_infer_undetermined():
     rules = [
-        {'l_string': 'A', 'r_string': 'CB|'}
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('CB|')}
     ]
     variables = {
         'A': {'fact': Fact.TRUE, 'verified': False},
@@ -84,7 +84,7 @@ def test_if_RHS_is_ambiguous_then_infer_undetermined():
 
 def test_if_fact_is_ambiguous_then_infer_undetermined():
     rules = [
-        {'l_string': 'A', 'r_string': 'CB&'}
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('CB&')}
     ]
     variables = {
         'A': {'fact': Fact.TRUE, 'verified': False},
@@ -98,8 +98,8 @@ def test_if_fact_is_ambiguous_then_infer_undetermined():
 
 def test_if_conflicting_rules_then_raise_error():
     rules = [
-        {'l_string': 'A', 'r_string': 'B'},
-        {'l_string': 'A', 'r_string': 'B!'}
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('B')},
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('B!')}
     ]
     variables = {
         'A': {'fact': Fact.TRUE, 'verified': False},
@@ -113,7 +113,7 @@ def test_if_conflicting_rules_then_raise_error():
 
 def test_if_RHS_is_impossible_for_query_true_or_false_then_query_is_undetermined():
     rules = [
-        {'l_string': 'A', 'r_string': 'CC!&'}
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('CC!&')}
     ]
     variables = {
         'A': {'fact': Fact.TRUE, 'verified': False},
@@ -126,8 +126,8 @@ def test_if_RHS_is_impossible_for_query_true_or_false_then_query_is_undetermined
 
 def test_if_query_depends_on_another_rule_then_solve_dependency_first():
     rules = [
-        {'l_string': 'A', 'r_string': 'B'},
-        {'l_string': 'B', 'r_string': 'C'}
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('B')},
+        {'l_tree': create_tree('B'), 'r_tree': create_tree('C')}
     ]
     variables = {
         'A': {'fact': Fact.TRUE, 'verified': False},
@@ -141,8 +141,8 @@ def test_if_query_depends_on_another_rule_then_solve_dependency_first():
 
 def test_if_multiple_rules_infer_same_fact_then_query_is_not_conflicting():
     rules = [
-        {'l_string': 'A', 'r_string': 'C'},
-        {'l_string': 'B', 'r_string': 'C'}
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('C')},
+        {'l_tree': create_tree('B'), 'r_tree': create_tree('C')}
     ]
     variables = {
         'A': {'fact': Fact.TRUE, 'verified': False},
@@ -156,9 +156,9 @@ def test_if_multiple_rules_infer_same_fact_then_query_is_not_conflicting():
 
 def test_cylic_dependencies_does_not_recurse_forever():
     rules = [
-        {'l_string': 'A', 'r_string': 'B'},
-        {'l_string': 'B', 'r_string': 'A'},
-        {'l_string': 'AC&', 'r_string': 'D'}
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('B')},
+        {'l_tree': create_tree('B'), 'r_tree': create_tree('A')},
+        {'l_tree': create_tree('AC&'), 'r_tree': create_tree('D')}
     ]
     variables = {
         'A': {'fact': Fact.FALSE, 'verified': False},
@@ -173,8 +173,8 @@ def test_cylic_dependencies_does_not_recurse_forever():
 
 def test_if_inference_from_first_rule_is_ambiguous_and_second_is_deterministic_then_override():
     rules = [
-        {'l_string': 'A', 'r_string': 'CB|'},
-        {'l_string': 'A', 'r_string': 'C'}
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('CB|')},
+        {'l_tree': create_tree('A'), 'r_tree': create_tree('C')}
     ]
     variables = {
         'A': {'fact': Fact.TRUE, 'verified': False},
