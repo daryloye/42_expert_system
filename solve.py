@@ -14,6 +14,7 @@ def infer_x_from_rule(x, rule, variables):
     # If LHS is true, then infer x from RHS
     original_fact = variables[x]["fact"]
     
+    # Compare RHS result with x being true / false
     variables[x]["fact"] = Fact.TRUE
     rhs_result_with_x_true = evaluate(rule["r_string"], variables)
 
@@ -85,10 +86,7 @@ def solve(x, rules, variables):
         
         # Check if any conflict with previous rules
         if variables[x]["fact"] not in (None, Fact.UNDETERMINED, inferred):
-            print_red(f"Conflict with previous rule, setting {x} to Undetermined")
-            variables[x]["fact"] = Fact.UNDETERMINED
-            variables[x]["verified"] = True
-            return Fact.UNDETERMINED
+            raise Exception(f"Conflict with previous rule")
 
         print_blue(f"Setting {x} to be {inferred}\n")
         variables[x]["fact"] = inferred

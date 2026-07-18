@@ -1,4 +1,5 @@
 from solve import *
+import pytest
 
 
 def test_if_query_is_verified_then_return_current_fact():
@@ -95,18 +96,19 @@ def test_if_fact_is_ambiguous_then_infer_undetermined():
     assert solve(x, rules, variables) == Fact.UNDETERMINED
 
 
-def test_if_conflicting_rules_then_x_is_undetermined():
+def test_if_conflicting_rules_then_raise_error():
     rules = [
-        {'l_string': 'A', 'r_string': 'C'},
-        {'l_string': 'A', 'r_string': 'C!'}
+        {'l_string': 'A', 'r_string': 'B'},
+        {'l_string': 'A', 'r_string': 'B!'}
     ]
     variables = {
         'A': {'fact': Fact.TRUE, 'verified': False},
-        'C': {'fact': Fact.FALSE, 'verified': False}
+        'B': {'fact': Fact.FALSE, 'verified': False}
     }
-    x = 'C'
+    x = 'B'
 
-    assert solve(x, rules, variables) == Fact.UNDETERMINED
+    with pytest.raises(Exception):
+        solve(x, rules, variables)
 
 
 def test_if_RHS_is_impossible_for_query_true_or_false_then_query_is_undetermined():

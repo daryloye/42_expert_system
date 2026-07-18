@@ -41,7 +41,7 @@ For each query:
    - if the left-hand side is true, evaluate the right-hand side;
    - if the query can be either true or false without changing the result of the right-hand side, mark it as undetermined;
    - compare the query conclusion with conclusions from previous rules;
-   - if there is a conflict, mark the fact as undetermined.
+   - if there is a conflict, raise exception.
 5. Return the final fact value.
 
 ## Testing 
