@@ -1,9 +1,10 @@
 from utils import *
 from evaluate import *
+from tree import *
 
 
 def infer_x_from_rule(x, rule, variables):
-    lhs_result = evaluate(rule["l_string"], variables)
+    lhs_result = evaluate(rule["l_string"], variables)                  #TODO
     print_blue(f"- LHS result: {lhs_result}")
     
     # If LHS is false, then RHS cannot be inferred. Skip the rule
@@ -16,10 +17,10 @@ def infer_x_from_rule(x, rule, variables):
     
     # Compare RHS result with x being true / false
     variables[x]["fact"] = Fact.TRUE
-    rhs_result_with_x_true = evaluate(rule["r_string"], variables)
+    rhs_result_with_x_true = evaluate(rule["r_string"], variables)      #TODO
 
     variables[x]["fact"] = Fact.FALSE
-    rhs_result_with_x_false = evaluate(rule["r_string"], variables)
+    rhs_result_with_x_false = evaluate(rule["r_string"], variables)     #TODO
 
     variables[x]["fact"] = original_fact
 
@@ -41,7 +42,8 @@ def infer_x_from_rule(x, rule, variables):
     
 
 def solve_dependencies(x, rule, rules, variables):
-    dependents = set(rule["l_string"] + rule["r_string"]) - set(SYMBOLS) - set(x)
+
+    dependents = set(rule["l_tree"].to_string() + rule["r_tree"].to_string()) - set(SYMBOLS) - set(x)
     print_blue(f"Dependent variables: {dependents}\n")
         
     for v in dependents:
@@ -63,7 +65,7 @@ def solve(x, rules, variables):
         return variables[x]["fact"]
 
     # If x is not in RHS of any rule, then return the current fact
-    if not any(x in r["r_string"] for r in rules):
+    if not any(r["r_tree"].has_elem(x) for r in rules):
         print_blue(f"Cannot find {x} in RHS of any rule, returning current fact")
         variables[x]["verified"] = True
         return variables[x]["fact"]
@@ -73,10 +75,10 @@ def solve(x, rules, variables):
     variables[x]["fact"] = None
     
     for rule in rules:
-        if x not in rule["r_string"]:
+        if not rule["r_tree"].has_elem(x):
             continue
         
-        print_blue(f"- Found {x} on RHS of rule: {rule['l_string']} => {rule['r_string']}")
+        print_blue(f"- Found {x} on RHS of rule: {rule['l_tree'].to_string()} => {rule['r_tree'].to_string()}")
 
         solve_dependencies(x, rule, rules, variables)
 

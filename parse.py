@@ -1,4 +1,5 @@
 from utils import *
+from tree import *
 
 # 输入运算符到内部后缀运算符的映射 / Map input operators to internal postfix symbols
 OP_MAP = {'+': '&', '|': '|', '^': '^'}
@@ -105,6 +106,8 @@ def parse(raw_rules, facts, queries):
     rules = [{
         "l_string": infix_to_postfix(lhs),
         "r_string": infix_to_postfix(rhs),
+        "l_tree": create_tree(infix_to_postfix(lhs)),
+        "r_tree": create_tree(infix_to_postfix(rhs))
     } for lhs, rhs in raw_rules]
 
     variables = create_variables(rules, queries, facts)
