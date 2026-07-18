@@ -101,12 +101,28 @@ def create_variables(rules, queries, facts):
     return variables
 
 
+# Split top-level AND conclusions into separate nodes
+def split_and(node):
+    if node.symbol != '&':
+        return [node]
+
+    return split_and(node.e1) + split_and(node.e2)
+
+
 # 把原始规则转成后缀式并初始化变量 / Convert raw rules to postfix and initialize variables
 def parse(raw_rules, facts, queries):
-    rules = [{
-        "l_tree": create_tree(infix_to_postfix(lhs)),
-        "r_tree": create_tree(infix_to_postfix(rhs))
-    } for lhs, rhs in raw_rules]
+    rules = []
+
+    for lhs, rhs in raw_rules:
+        l_tree = create_tree(infix_to_postfix(lhs))
+        r_tree = create_tree(infix_to_postfix(rhs))
+
+        # Create one rule for each AND conclusion
+        for conclusion in split_and(r_tree):
+            rules.append({
+                "l_tree": l_tree,
+                "r_tree": conclusion
+            })
 
     variables = create_variables(rules, queries, facts)
 
