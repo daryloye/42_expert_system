@@ -16,9 +16,10 @@ Reads the input text file and validates that:
 
 Parses the validated input and returns:
 
-- an array of rules, where each rule contains a left-hand side string and a right-hand side string
+- an graph of rules, where each rule contains a left-hand side string and a right-hand side string
 	- In this array, LHS implies (=>) RHS
 	- Hence if the imput has a rule X <=> Y, the array will break it into X => Y and Y => X
+   - If there is a rule A => B + C, then it will be broken into A => B and A => C
 - a map of variables storing
 	- `fact`: whether the variable is true, false or undetermined
 	- `verified`: whether the variable has already been evaluated

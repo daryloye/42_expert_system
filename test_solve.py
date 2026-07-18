@@ -171,6 +171,25 @@ def test_cylic_dependencies_does_not_recurse_forever():
     assert solve(x, rules, variables) == Fact.FALSE
 
 
+def test_cyclic_dependencies_with_multiple_rules_do_not_recurse_forever():
+    rules = [
+        {'l_tree': create_tree('C!'), 'r_tree': create_tree('B')},
+        {'l_tree': create_tree('AB|'), 'r_tree': create_tree('C')},
+        {'l_tree': create_tree('C'), 'r_tree': create_tree('A')},
+        {'l_tree': create_tree('C!'), 'r_tree': create_tree('A')},
+        {'l_tree': create_tree('AB&'), 'r_tree': create_tree('C')},
+        {'l_tree': create_tree('C'), 'r_tree': create_tree('B')},
+    ]
+    variables = {
+        'A': {'fact': Fact.FALSE, 'verified': False},
+        'B': {'fact': Fact.FALSE, 'verified': False},
+        'C': {'fact': Fact.FALSE, 'verified': False},
+    }
+    x = 'C'
+
+    assert solve(x, rules, variables) == Fact.UNDETERMINED
+
+
 def test_if_inference_from_first_rule_is_ambiguous_and_second_is_deterministic_then_override():
     rules = [
         {'l_tree': create_tree('A'), 'r_tree': create_tree('CB|')},

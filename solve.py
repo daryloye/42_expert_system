@@ -4,7 +4,7 @@ from tree import *
 
 
 def infer_x_from_rule(x, rule, variables):
-    lhs_result = evaluate_tree(rule["l_tree"], variables)                  #TODO
+    lhs_result = evaluate_tree(rule["l_tree"], variables)
     print_blue(f"- LHS result: {lhs_result}")
     
     # If LHS is false, then RHS cannot be inferred. Skip the rule
@@ -17,10 +17,10 @@ def infer_x_from_rule(x, rule, variables):
     
     # Compare RHS result with x being true / false
     variables[x]["fact"] = Fact.TRUE
-    rhs_result_with_x_true = evaluate_tree(rule["r_tree"], variables)      #TODO
+    rhs_result_with_x_true = evaluate_tree(rule["r_tree"], variables)
 
     variables[x]["fact"] = Fact.FALSE
-    rhs_result_with_x_false = evaluate_tree(rule["r_tree"], variables)     #TODO
+    rhs_result_with_x_false = evaluate_tree(rule["r_tree"], variables)
 
     variables[x]["fact"] = original_fact
 
@@ -54,7 +54,7 @@ def solve_dependencies(x, rule, rules, variables):
 
 def solve(x, rules, variables):
     # If x has already been verified, then return the fact
-    if variables[x]["verified"] is True:
+    if variables[x]["verified"]:
         print_blue(f"{x} has already been verified as {variables[x]['fact']}")
         return variables[x]["fact"]
 
