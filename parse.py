@@ -88,7 +88,7 @@ def create_variables(rules, queries, facts):
     variables = {
         c: {"fact": Fact.FALSE, "verified": False}
         for r in rules
-        for c in r["l_string"] + r["r_string"]
+        for c in r["l_tree"].to_string() + r["r_tree"].to_string()
         if c in LETTERS
     }
 
@@ -104,8 +104,6 @@ def create_variables(rules, queries, facts):
 # 把原始规则转成后缀式并初始化变量 / Convert raw rules to postfix and initialize variables
 def parse(raw_rules, facts, queries):
     rules = [{
-        "l_string": infix_to_postfix(lhs),
-        "r_string": infix_to_postfix(rhs),
         "l_tree": create_tree(infix_to_postfix(lhs)),
         "r_tree": create_tree(infix_to_postfix(rhs))
     } for lhs, rhs in raw_rules]
