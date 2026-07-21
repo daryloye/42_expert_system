@@ -41,24 +41,28 @@ def infer_x_from_rule(x, rule, variables):
             return Fact.UNDETERMINED
     
 
-def solve_dependencies(x, rule, rules, variables):
+def solve_dependencies(x, rule, rules, variables, visiting):
 
     dependents = set(rule["l_tree"].to_string() + rule["r_tree"].to_string()) - set(SYMBOLS) - set(x)
     print_blue(f"Dependent variables: {dependents}\n")
         
     for v in dependents:
         print_blue(f"-- Solving for: {v}")
-        result = solve(v, rules, variables)
+        result = solve(v, rules, variables, visiting)
         print_green(f"{v} is {result}\n")
 
 
-def solve(x, rules, variables):
+def solve(x, rules, variables, visiting=None):
+    # Initialise visiting set to check if the same (variable, rule) pair has been seen before during the recursion loop
+    if visiting is None:
+        visiting = set()
+
     # If x has already been verified, then return the fact
     if variables[x]["verified"]:
         print_blue(f"{x} has already been verified as {variables[x]['fact']}")
         return variables[x]["fact"]
 
-    # Mark cyclic dependencies as undetermined
+    # Check for variable level cycle ie. solve(C) -> solve(A) -> solve(C)
     if variables[x]["fact"] is None:
         print_blue(f"{x} is cyclic dependency, marking as undetermined")
         variables[x]["fact"] = Fact.UNDETERMINED
@@ -74,13 +78,26 @@ def solve(x, rules, variables):
     current_fact = variables[x]["fact"]
     variables[x]["fact"] = None
     
-    for rule in rules:
+    for rule_id, rule in enumerate(rules):
         if not rule["r_tree"].has_elem(x):
             continue
         
         print_blue(f"- Found {x} on RHS of rule: {rule['l_tree'].to_string()} => {rule['r_tree'].to_string()}")
 
-        solve_dependencies(x, rule, rules, variables)
+        # Check for rule path cycle ie. rule 1 -> rule 2 -> rule 1
+        current = (x, rule_id)
+        if current in visiting:
+            print_blue(f"{x} is cyclic dependency, marking as undetermined")
+            variables[x]["fact"] = Fact.UNDETERMINED
+            variables[x]["verified"] = True
+            return variables[x]["fact"]
+        
+        visiting.add(current)
+        solve_dependencies(x, rule, rules, variables, visiting)
+        visiting.remove(current)
+
+        if variables[x]["verified"]:
+            return variables[x]["fact"]
 
         inferred = infer_x_from_rule(x, rule, variables)
         if inferred is None:
